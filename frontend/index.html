@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRM Full Stack Challenge</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 900px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { color: #1a73e8; text-align: center; }
+        textarea { width: 100%; height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; font-size: 14px; box-sizing: border-box; }
+        button { background-color: #1a73e8; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 15px; transition: background 0.3s; }
+        button:hover { background-color: #1557b0; }
+        pre { background: #2d2d2d; color: #61dafb; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+        .error { color: #d93025; background: #fce8e6; padding: 10px; border-radius: 4px; display: none; margin-top: 10px; }
+        .section-title { font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #555; text-transform: uppercase; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SRM Engineering Challenge</h1>
+        
+        <div class="card">
+            <div class="section-title">Input Node List (JSON Array)</div>
+            <textarea id="nodeInput">["A->B", "A->C", "B->D", "X->Y", "Y->Z", "Z->X", "P->Q", "hello"]</textarea>
+            <button onclick="submitData()">Process Hierarchy</button>
+            <div id="errorMsg" class="error"></div>
+        </div>
+
+        <div class="card" id="resultCard" style="display:none;">
+            <div class="section-title">API Response Insight</div>
+            <pre id="jsonResponse"></pre>
+        </div>
+    </div>
+
+    <script>
+        async function submitData() {
+            const inputElement = document.getElementById('nodeInput');
+            const errorDiv = document.getElementById('errorMsg');
+            const resultCard = document.getElementById('resultCard');
+            const jsonPre = document.getElementById('jsonResponse');
+            
+            errorDiv.style.display = "none";
+            
+            try {
+                // Parse the input text into a JSON array
+                const dataArray = JSON.parse(inputElement.value);
+                
+                // Call your local backend
+                const response = await fetch('http://localhost:3000/bfhl', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: dataArray })
+                });
+
+                if (!response.ok) throw new Error("Server responded with an error.");
+                
+                const result = await response.json();
+                
+                // Show result
+                resultCard.style.display = "block";
+                jsonPre.innerText = JSON.stringify(result, null, 2);
+
+            } catch (err) {
+                errorDiv.style.display = "block";
+                errorDiv.innerText = "Error: " + err.message + " (Ensure input is a valid JSON array and backend is running)";
+            }
+        }
+    </script>
+</body>
+</html>
